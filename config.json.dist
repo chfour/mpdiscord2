@@ -1,0 +1,5 @@
+{
+    "mpd": {
+        "server": "/run/user/1000/mpd/socket"
+    }
+}
