@@ -1,5 +1,6 @@
 {
     "mpd": {
         "server": "/run/user/1000/mpd/socket"
-    }
+    },
+    "clientid": "1105199084731641887"
 }
