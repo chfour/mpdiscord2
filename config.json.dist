@@ -2,5 +2,15 @@
     "mpd": {
         "server": "/run/user/1000/mpd/socket"
     },
-    "clientid": "1105199084731641887"
+    "rpc": {
+        "clientid": "1105199084731641887",
+        "presence": {
+            "details": "{track.get('title', 'Unknown title')}",
+            "state": "{track.get('artist', 'Unknown artist')}",
+            "large_image": "unknown",
+            "large_text": "https://github.com/chfour/mpdiscord2",
+            "small_image": "play",
+            "small_text": "{track.get('format')} / vol {status.get('volume', '?')}% / {', '.join([k for k in ('repeat', 'random', 'single', 'consume') if k in status and status[k] == '1'])}"
+        }
+    }
 }

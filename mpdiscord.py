@@ -1,10 +1,23 @@
 from mpd.asyncio import MPDClient
 from pypresence import AioPresence
+from string import Formatter
 import json
 import asyncio
 
 
-async def update(mpd: MPDClient, rpc: AioPresence) -> None:
+class EvalFormatter(Formatter):
+    """
+        `string.Formatter` that `eval()`s all fields.
+        only kwargs passed to `format()` matter here and will be passed as globals to `eval()`
+    """
+
+    def get_field(self, field_name, args, kwargs) -> str:
+        # we don't reaaaally need to return the second argument as it's just used for unused args checking
+        # (which we don't do)
+        return eval(field_name, kwargs, {}), ""
+
+
+async def update(mpd: MPDClient, rpc: AioPresence, formatfields: dict) -> None:
     """
         update an aiopresence with data from an mpd client
     """
@@ -15,7 +28,14 @@ async def update(mpd: MPDClient, rpc: AioPresence) -> None:
     print(f"track: {track!r}")
 
     if status.get("state", None) == "play":
-        await rpc.update(state=f"{track.get('artist', '?')}", details=f"{track.get('title', '?')}", large_image="unknown")
+        presence = formatfields.copy()
+
+        formatter = EvalFormatter()  # why isn't format() a classmethod
+        for k in "state", "details", "large_text", "small_text":
+            presence[k] = formatter.format(presence[k], status=status, track=track)[:128]
+
+        print(f"presence: {presence!r}")
+        await rpc.update(**presence)
     else:
         await rpc.clear()
         # rpc.close()
@@ -31,14 +51,14 @@ async def main(config: dict):
     await mpd.connect(config["mpd"]["server"])
     print(f"connected to mpd at {config['mpd']!r}")
 
-    rpc = AioPresence(config["clientid"])  # , loop=asyncio.get_event_loop())
+    rpc = AioPresence(config["rpc"]["clientid"])  # , loop=asyncio.get_event_loop())
     await rpc.connect()
     print("connected to rpc")
 
-    await update(mpd, rpc)
+    await update(mpd, rpc, config["rpc"]["presence"])
     async for subsys in mpd.idle(("player",)):
         print(f"change: {subsys}")
-        await update(mpd, rpc)
+        await update(mpd, rpc, config["rpc"]["presence"])
 
 
 if __name__ == "__main__":
