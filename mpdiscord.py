@@ -32,7 +32,13 @@ async def update(mpd: MPDClient, rpc: AioPresence, formatfields: dict) -> None:
 
         formatter = EvalFormatter()  # why isn't format() a classmethod
         for k in "state", "details", "large_text", "small_text":
+            if k not in presence:
+                continue
             presence[k] = formatter.format(presence[k], status=status, track=track)[:128]
+
+        for k in presence:
+            if presence[k] == "":
+                presence[k] = None
 
         print(f"presence: {presence!r}")
         await rpc.update(**presence)
