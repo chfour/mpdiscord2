@@ -7,10 +7,11 @@
         "presence": {
             "details": "{track.get('title', 'Unknown title')}",
             "state": "{track.get('artist', 'Unknown artist')}",
-            "large_image": "unknown",
-            "large_text": "https://github.com/chfour/mpdiscord2",
+            "large_image": "$cover/unknown",
+            "large_text": "{track.get('album', 'Unknown album')}{' ('+track['date']+')' if 'date' in track else ''}",
             "small_image": "play",
-            "small_text": "{track.get('format')} / vol {status.get('volume', '?')}% / {', '.join([k for k in ('repeat', 'random', 'single', 'consume') if k in status and status[k] == '1'])}"
+            "small_text": "{track.get('format')} / vol {status.get('volume', '?')}% / {', '.join([k for k in ('repeat', 'random', 'single', 'consume') if k in status and status[k] == '1'])} | chfour/mpdiscord2"
         }
-    }
+    },
+    "coverartarchive": "https://coverartarchive.org/"
 }
