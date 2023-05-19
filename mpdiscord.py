@@ -63,6 +63,10 @@ async def update(mpd: MPDClient, rpc: AioPresence, config: dict) -> None:
                 continue
             presence[k] = formatter.format(presence[k], status=status, track=track)[:128]
 
+        for b in presence["buttons"]:
+            for k in "label", "url":
+                b[k] = formatter.format(b[k], status=status, track=track)  # i don't know what the limits are for that
+
         cover_url = None
         for k in "large_image", "small_image":
             if k not in presence or not presence[k].startswith("$cover"):
@@ -84,6 +88,8 @@ async def update(mpd: MPDClient, rpc: AioPresence, config: dict) -> None:
         for k in presence:
             if presence[k] == "":
                 presence[k] = None
+
+        presence["buttons"] = [b for b in presence["buttons"] if b["label"] != "" and b["url"] != ""]
 
         print(f"presence: {presence!r}")
         await rpc.update(**presence)
